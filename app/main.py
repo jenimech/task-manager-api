@@ -55,3 +55,16 @@ def delete_project(project_id: int):
         status_code=404,
         detail="Project not found"
     )
+
+
+@app.put("/projects/{project_id}")
+def update_project(project_id: int, project_data: ProjectCreate):
+    for project in projects:
+        if project.id == project_id:
+            project.name = project_data.name
+            project.description = project_data.description
+            return project
+    raise HTTPException(
+        status_code=404,
+        detail="Project not found"
+    )
