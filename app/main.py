@@ -7,6 +7,10 @@ class ProjectCreate(BaseModel):
     name: str
     description: str
 
+class ProjectUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
 class Project(BaseModel):
     id: int
     name: str
@@ -15,13 +19,16 @@ class Project(BaseModel):
 projects = []
 next_project_id = 1
 
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+
 @app.get("/projects")
 def get_projects():
     return projects
+
 
 @app.post("/projects")
 def create_project(project: ProjectCreate):
@@ -35,6 +42,7 @@ def create_project(project: ProjectCreate):
     next_project_id += 1
     return new_project
 
+
 @app.get("/projects/{project_id}")
 def get_project(project_id: int):
     for project in projects:
@@ -44,6 +52,7 @@ def get_project(project_id: int):
         status_code=404,
         detail="Project not found"
     )
+
 
 @app.delete("/projects/{project_id}")
 def delete_project(project_id: int):
@@ -63,6 +72,23 @@ def update_project(project_id: int, project_data: ProjectCreate):
         if project.id == project_id:
             project.name = project_data.name
             project.description = project_data.description
+            return project
+    raise HTTPException(
+        status_code=404,
+        detail="Project not found"
+    )
+
+
+@app.patch("/projects/{project_id}")
+def partial_update_project(project_id: int, project_data: ProjectUpdate):
+    for project in projects:
+        if project.id == project_id:
+            if project_data.name is not None:
+                project.name = project_data.name
+
+            if project_data.description is not None:
+                project.description = project_data.description
+
             return project
     raise HTTPException(
         status_code=404,
