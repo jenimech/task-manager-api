@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 
 from ..database import SessionLocal
 from .. import models
-from ..schemas import ProjectCreate, ProjectUpdate
+from ..schemas import (
+  ProjectCreate,
+  ProjectUpdate,
+  ProjectResponse,
+  MessageResponse
+)
 
 
 router = APIRouter()
@@ -17,13 +22,13 @@ def get_db():
         db.close()
 
 
-@router.get("/projects")
+@router.get("/projects", response_model=list[ProjectResponse])
 def get_projects(db: Session = Depends(get_db)):
     projects = db.query(models.Project).all()
     return projects
 
 
-@router.post("/projects")
+@router.post("/projects", response_model=ProjectResponse)
 def create_project(project: ProjectCreate, db: Session = Depends(get_db)):
     new_project = models.Project(
         name=project.name,
@@ -36,7 +41,7 @@ def create_project(project: ProjectCreate, db: Session = Depends(get_db)):
     return new_project
 
 
-@router.get("/projects/{project_id}")
+@router.get("/projects/{project_id}", response_model=ProjectResponse)
 def get_project(project_id: int, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if project is None:
@@ -47,7 +52,7 @@ def get_project(project_id: int, db: Session = Depends(get_db)):
     return project
 
 
-@router.delete("/projects/{project_id}")
+@router.delete("/projects/{project_id}", response_model=MessageResponse)
 def delete_project(project_id: int, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if project is None:
@@ -60,7 +65,7 @@ def delete_project(project_id: int, db: Session = Depends(get_db)):
     return {"message": "Project deleted successfully"}
 
 
-@router.put("/projects/{project_id}")
+@router.put("/projects/{project_id}", response_model=ProjectResponse)
 def update_project(project_id: int, project_data: ProjectCreate, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if project is None:
@@ -76,7 +81,7 @@ def update_project(project_id: int, project_data: ProjectCreate, db: Session = D
     return project
 
 
-@router.patch("/projects/{project_id}")
+@router.patch("/projects/{project_id}", response_model=ProjectResponse)
 def partial_update_project(project_id: int, project_data: ProjectUpdate, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == project_id).first()
     if project is None:
